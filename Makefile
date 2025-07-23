@@ -7,10 +7,6 @@ GOARCH = wasm
 export
 LINT_VERSION=1.52.2
 
-.PHONY: serve
-serve:
-	go run ./server
-
 .PHONY: lint-deps
 lint-deps: go
 	@if ! which golangci-lint >/dev/null || [[ "$$(golangci-lint version 2>&1)" != *${LINT_VERSION}* ]]; then \
@@ -42,24 +38,24 @@ test-js: go
 test: test-native #test-js  # TODO restore when this is resolved: https://travis-ci.community/t/goos-js-goarch-wasm-go-run-fails-panic-newosproc-not-implemented/1651
 
 .PHONY: go-static
-go-static: server/public/wasm/go.tar.gz commands
+go-static: build/go.tar.gz commands
 
-server/public/wasm:
-	mkdir -p server/public/wasm
+build:
+	mkdir -p build
 
-server/public/wasm/go.tar.gz: server/public/wasm go
+build/go.tar.gz: build go
 	GOARCH=$$(go env GOHOSTARCH) GOOS=$$(go env GOHOSTOS) \
-		go run ./internal/cmd/gozip cache/go > server/public/wasm/go.tar.gz
+		go run ./internal/cmd/gozip cache/go > build/go.tar.gz
 
 .PHONY: clean
 clean:
-	rm -rf ./out ./server/public/wasm
+	rm -rf ./out ./build
 
 cache:
 	mkdir -p cache
 
 .PHONY: commands
-commands: server/public/wasm/wasm_exec.js server/public/wasm/main.wasm $(patsubst cmd/%,server/public/wasm/%.wasm,$(wildcard cmd/*))
+commands: build/wasm_exec.js build/gowasm.wasm $(patsubst cmd/%,build/%.wasm,$(wildcard cmd/*))
 
 .PHONY: go
 go: cache/go${GO_VERSION}
@@ -90,40 +86,11 @@ cache/go${GO_VERSION}: cache
 	touch cache/go${GO_VERSION}
 	touch cache/go.mod  # Makes it so linters will ignore this dir
 
-server/public/wasm/%.wasm: server/public/wasm go
+build/%.wasm: build go
 	go build -o $@ ./cmd/$*
 
-server/public/wasm/main.wasm: server/public/wasm go
-	go build -o server/public/wasm/main.wasm .
+build/gowasm.wasm: build go
+	go build -o build/gowasm.wasm ./cmd/gowasm
 
-server/public/wasm/wasm_exec.js: go
-	cp cache/go/misc/wasm/wasm_exec.js server/public/wasm/wasm_exec.js
-
-.PHONY: node-static
-node-static:
-	npm --prefix=server ci
-	npm --prefix=server run build
-
-.PHONY: watch
-watch:
-	@if [[ ! -d server/node_modules ]]; then \
-		npm --prefix=server ci; \
-	fi
-	npm --prefix=server run start-go & \
-	npm --prefix=server start
-
-.PHONY: build
-build: build-docker
-	rm -rf ./out
-	docker cp $$(docker create --rm hackpad):/usr/share/nginx/html ./out
-
-.PHONY: build-docker
-build-docker:
-	docker build -t hackpad .
-
-.PHONY: run-docker
-run-docker: build-docker
-	docker run -it --rm \
-		--name hackpad \
-		-p 8080:80 \
-		hackpad:latest
+build/wasm_exec.js: go
+	cp cache/go/misc/wasm/wasm_exec.js build/wasm_exec.js

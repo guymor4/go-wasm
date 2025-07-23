@@ -1,7 +1,7 @@
 //go:build js
 // +build js
 
-package main
+package gowasm
 
 import (
 	"errors"

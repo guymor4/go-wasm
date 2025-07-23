@@ -1,7 +1,7 @@
 //go:build js
 // +build js
 
-package main
+package gowasm
 
 import (
 	"path/filepath"
@@ -13,13 +13,11 @@ import (
 	"github.com/hack-pad/hackpad/internal/js/process"
 	"github.com/hack-pad/hackpad/internal/log"
 	libProcess "github.com/hack-pad/hackpad/internal/process"
-	"github.com/hack-pad/hackpad/internal/terminal"
 )
 
 func main() {
 	process.Init()
 	fs.Init()
-	global.Set("spawnTerminal", js.FuncOf(terminal.SpawnTerminal))
 	global.Set("dump", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		go func() {
 			basePath := ""
