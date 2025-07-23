@@ -1,7 +1,7 @@
 //go:build js
 // +build js
 
-package gowasm
+package main
 
 import (
 	"path/filepath"

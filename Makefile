@@ -55,7 +55,7 @@ cache:
 	mkdir -p cache
 
 .PHONY: commands
-commands: build/wasm_exec.js build/gowasm.wasm $(patsubst cmd/%,build/%.wasm,$(wildcard cmd/*))
+commands: build/wasm_exec.js build/go.wasm $(patsubst cmd/%,build/%.wasm,$(wildcard cmd/*))
 
 .PHONY: go
 go: cache/go${GO_VERSION}
@@ -67,8 +67,8 @@ cache/go${GO_VERSION}: cache
 		git clone \
 			--depth 1 \
 			--single-branch \
-			--branch hackpad/release-branch.go${GO_VERSION} \
-			https://github.com/hack-pad/go.git \
+			--branch hackpad/release-branch.go1.20 \
+			https://github.com/guymor4/go.git \
 			"$$TMP"; \
 		pushd "$$TMP/src"; \
 		./make.bash; \
@@ -89,8 +89,8 @@ cache/go${GO_VERSION}: cache
 build/%.wasm: build go
 	go build -o $@ ./cmd/$*
 
-build/gowasm.wasm: build go
-	go build -o build/gowasm.wasm ./cmd/gowasm
+build/go.wasm: build go
+	go build -o build/go.wasm .
 
 build/wasm_exec.js: go
 	cp cache/go/misc/wasm/wasm_exec.js build/wasm_exec.js

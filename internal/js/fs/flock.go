@@ -4,13 +4,19 @@
 package fs
 
 import (
-	"syscall"
 	"syscall/js"
 
 	"github.com/hack-pad/hackpad/internal/common"
 	"github.com/hack-pad/hackpad/internal/fs"
 	"github.com/hack-pad/hackpad/internal/process"
 	"github.com/pkg/errors"
+)
+
+const (
+	LOCK_EX = 0x2
+	LOCK_NB = 0x4
+	LOCK_SH = 0x1
+	LOCK_UN = 0x8
 )
 
 func flock(args []js.Value) ([]interface{}, error) {
@@ -27,11 +33,11 @@ func flockSync(args []js.Value) (interface{}, error) {
 	var action fs.LockAction
 	shouldLock := true
 	switch flag {
-	case syscall.LOCK_EX:
+	case LOCK_EX:
 		action = fs.LockExclusive
-	case syscall.LOCK_SH:
+	case LOCK_SH:
 		action = fs.LockShared
-	case syscall.LOCK_UN:
+	case LOCK_UN:
 		action = fs.Unlock
 	}
 
