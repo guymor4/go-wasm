@@ -1,5 +1,5 @@
 SHELL := /usr/bin/env bash
-GO_VERSION = 1.20
+GO_VERSION = 1.25
 GOROOT =
 PATH := ${PWD}/cache/go/bin:${PWD}/cache/go/misc/wasm:${PATH}
 GOOS = js
@@ -67,7 +67,7 @@ cache/go${GO_VERSION}: cache
 		git clone \
 			--depth 1 \
 			--single-branch \
-			--branch hackpad/release-branch.go1.20 \
+			--branch dev \
 			https://github.com/guymor4/go.git \
 			"$$TMP"; \
 		pushd "$$TMP/src"; \
@@ -93,4 +93,4 @@ build/go.wasm: build go
 	go build -o build/go.wasm .
 
 build/wasm_exec.js: go
-	cp cache/go/misc/wasm/wasm_exec.js build/wasm_exec.js
+	cp cache/go/lib/wasm/wasm_exec.js build/wasm_exec.js
